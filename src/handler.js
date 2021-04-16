@@ -51,16 +51,41 @@ const addBookHandler = (request, h) => {
   return responseError(h, 500, 'Buku gagal ditambahkan');
 };
 
-const getAllBooksHandler = () => ({
-  status: 'success',
-  data: {
-    books: books.map((book) => ({
+const getAllBooksHandler = (request, h) => {
+  const {name, reading, finished} = request.query;
+  const nameLower = name ? name.toLowerCase() : undefined;
+
+  const hasName = books.filter((book) => book.name.toLowerCase().includes(nameLower));
+  const isRead = books.filter((book) => book.reading == reading);
+  const isFinish = books.filter((book) => book.finished == finished);
+  console.log(hasName);
+
+  const getData = (data) => ({
+    books: data.map((book) => ({
       id: book.id,
       name: book.name,
       publisher: book.publisher,
     })),
-  },
-});
+  });
+
+  if (name) {
+    const data = getData(hasName);
+    return responseSuccess(h, 200, undefined, data);
+  }
+
+  if (reading) {
+    const data = getData(isRead);
+    return responseSuccess(h, 200, undefined, data);
+  }
+
+  if (finished) {
+    const data = getData(isFinish);
+    return responseSuccess(h, 200, undefined, data);
+  }
+
+  const data = getData(books);
+  return responseSuccess(h, 200, undefined, data);
+};
 
 const getBookByIdHandler = (request, h) => {
   const {bookId} = request.params;
