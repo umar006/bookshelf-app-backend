@@ -1,8 +1,18 @@
 const responseSuccess = (h, statusCode, messageBody, dataBody) => {
-  if (statusCode === 200) {
+  if (!messageBody) {
     const response = h.response({
       status: 'success',
       data: dataBody,
+    });
+
+    response.code(statusCode);
+    return response;
+  }
+
+  if (!dataBody) {
+    const response = h.response({
+      status: 'success',
+      message: messageBody,
     });
 
     response.code(statusCode);

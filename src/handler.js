@@ -4,8 +4,15 @@ import {responseError, responseFail, responseSuccess} from './handlerResponse.js
 
 const addBookHandler = (request, h) => {
   const {
-    name, year, author, summary, publisher
-    , pageCount, readPage, reading} = request.payload;
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+  } = request.payload;
 
   const id = nanoid(16);
   const finished = pageCount === readPage;
@@ -58,8 +65,7 @@ const getAllBooksHandler = () => ({
 const getBookByIdHandler = (request, h) => {
   const {bookId} = request.params;
 
-  const findBook = books.filter((book) => book.id === bookId)[0];
-  console.log(findBook);
+  const findBook = books.find((book) => book.id === bookId);
   if (findBook) {
     return responseSuccess(h, 200, undefined, {book: findBook});
   }
@@ -67,4 +73,64 @@ const getBookByIdHandler = (request, h) => {
   return responseFail(h, 404, 'Buku tidak ditemukan');
 };
 
-export {addBookHandler, getAllBooksHandler, getBookByIdHandler};
+const editBookByIdHandler = (request, h) => {
+  const {bookId} = request.params;
+
+  const {
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+  } = request.payload;
+  const updatedAt = new Date().toISOString();
+
+  const found = books.findIndex((book) => book.id === bookId);
+  if (found !== -1) {
+    if (!name) {
+      return responseFail(h, 400, 'Gagal memperbarui buku. Mohon isi nama buku');
+    }
+
+    if (readPage > pageCount) {
+      return responseFail(h, 400, 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount');
+    }
+
+    books[found] = {
+      ...books[found],
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      reading,
+      updatedAt,
+    };
+
+    return responseSuccess(h, 200, 'Buku berhasil diperbarui', undefined);
+  }
+
+  return responseFail(h, 404, 'Gagal memperbarui buku. Id tidak ditemukan');
+};
+
+const deleteBookByIdHandler = (request, h) => {
+  const {bookId} = request.params;
+
+  const found = books.findIndex((book) => book.id === bookId);
+  if (found !== -1) {
+    books.splice(found);
+
+    return responseSuccess(h, 200, 'Buku berhasil dihapus');
+  }
+
+  return responseFail(h, 404, 'Buku gagal dihapus. Id tidak ditemukan');
+};
+
+export {
+  addBookHandler, getAllBooksHandler, getBookByIdHandler
+  , editBookByIdHandler, deleteBookByIdHandler,
+};
