@@ -1,4 +1,14 @@
 const responseSuccess = (h, statusCode, messageBody, dataBody) => {
+  if (statusCode === 200) {
+    const response = h.response({
+      status: 'success',
+      data: dataBody,
+    });
+
+    response.code(statusCode);
+    return response;
+  }
+
   const response = h.response({
     status: 'success',
     message: messageBody,
